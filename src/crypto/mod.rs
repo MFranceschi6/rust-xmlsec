@@ -2,16 +2,27 @@
 //! Crypto Backend Wrappings
 //!
 
-// TODO do proper selection for the backend depending on env var set for xmlsec crypto
+#[cfg(feature = "dynamic")]
+mod dynamic;
+#[cfg(feature = "dynamic")]
+pub use dynamic::XmlSecSignatureMethod;
 
-// mod nss;
-// pub use nss::XmlSecSignatureMethod;
+#[cfg(feature = "nss")]
+mod nss;
+#[cfg(feature = "nss")]
+pub use nss::XmlSecSignatureMethod;
 
-// mod gcrypt;
-// pub use gcrypt::XmlSecSignatureMethod;
+#[cfg(feature = "gcrypt")]
+mod gcrypt;
+#[cfg(feature = "gcrypt")]
+pub use gcrypt::XmlSecSignatureMethod;
 
-// mod gnutls;
-// pub use gnutls::XmlSecSignatureMethod;
+#[cfg(feature = "gnutls")]
+mod gnutls;
+#[cfg(feature = "gnutls")]
+pub use gnutls::XmlSecSignatureMethod;
 
+#[cfg(feature = "openssl")]
 mod openssl;
+#[cfg(feature = "openssl")]
 pub use openssl::XmlSecSignatureMethod;

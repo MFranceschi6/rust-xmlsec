@@ -85,8 +85,22 @@ fn init_crypto_app()
     //                 Make sure that you have it installed and check shread libraries path");
     //     }
     // }
-
+    #[cfg(feature = "dynamic")]
+    let rc = {   
+        let rc = unsafe { bindings::xmlSecCryptoDLLoadLibrary(null()) };
+        if rc < 0 {
+            panic!("XmlSec failed while loading default crypto backend. \
+                    Make sure that you have it installed and check shread libraries path");
+        }
+        unsafe { bindings::xmlSecCryptoAppInit(null()) }
+    };
+    #[cfg(feature = "nss")]
+    let rc = unsafe { bindings::xmlSecNssAppInit(null()) };
+    #[cfg(feature = "gnutls")]
+    let rc = unsafe { bindings::xmlSecGnuTLSAppInit(null()) };
+    #[cfg(feature = "openssl")]
     let rc = unsafe { bindings::xmlSecOpenSSLAppInit(null()) };
+    
 
     if rc < 0 {
         panic!("XmlSec failed to init crypto backend")
@@ -97,6 +111,13 @@ fn init_crypto_app()
 /// Init xmlsec-crypto library
 fn init_crypto()
 {
+    #[cfg(feature = "dynamic")]
+    let rc = unsafe { bindings::xmlSecCryptoInit() };
+    #[cfg(feature = "nss")]
+    let rc = unsafe { bindings::xmlSecNssInit() };
+    #[cfg(feature = "gnutls")]
+    let rc = unsafe { bindings::xmlSecGnuTLSInit() };
+    #[cfg(feature = "openssl")]
     let rc = unsafe { bindings::xmlSecOpenSSLInit() };
 
     if rc < 0 {
@@ -109,6 +130,13 @@ fn init_crypto()
 /// Shutdown xmlsec-crypto library
 fn cleanup_crypto()
 {
+    #[cfg(feature = "dynamic")]
+    unsafe { bindings::xmlSecCryptoShutdown() };
+    #[cfg(feature = "nss")]
+    unsafe { bindings::xmlSecNssShutdown() };
+    #[cfg(feature = "gnutls")]
+    unsafe { bindings::xmlSecGnuTLSShutdown() };
+    #[cfg(feature = "openssl")]
     unsafe { bindings::xmlSecOpenSSLShutdown() };
 }
 
@@ -116,6 +144,13 @@ fn cleanup_crypto()
 /// Shutdown crypto library
 fn cleanup_crypto_app()
 {
+    #[cfg(feature = "dynamic")]
+    unsafe { bindings::xmlSecCryptoAppShutdown() };
+    #[cfg(feature = "nss")]
+    unsafe { bindings::xmlSecNssAppShutdown() };
+    #[cfg(feature = "gnutls")]
+    unsafe { bindings::xmlSecGnuTLSAppShutdown() };
+    #[cfg(feature = "openssl")]
     unsafe { bindings::xmlSecOpenSSLAppShutdown() };
 }
 

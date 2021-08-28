@@ -20,3 +20,11 @@ lazy_static = {version = "^1.4"}
 [build-dependencies]
 pkg-config = {version = "^0.3"}
 bindgen    = {version = "^0.59"}
+
+[features]
+default = ["dynamic"]
+dynamic = []
+openssl = []
+gnutls  = []
+gcrypt  = []
+nss     = []

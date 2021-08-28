@@ -62,11 +62,11 @@ fn verify_signature(doc: &XmlDocument)
     sigctx.insert_key(key);
 
     // optionaly specify the attribute ID names in the nodes you are verifying
-    doc.specify_idattr("//prefix:DataNodes", "MyIDAttrName", Some(&[("prefix", "namespace")]))
-        .expect(
-            "Could not specify ID attr name. This error specifies whether no nodes where found \
-            or if there was an attr name collision."
-        );
+    // doc.specify_idattr("//prefix:DataNodes", "MyIDAttrName", Some(&[("prefix", "namespace")]))
+    //     .expect(
+    //         "Could not specify ID attr name. This error specifies whether no nodes where found \
+    //         or if there was an attr name collision."
+    //     );
 
     let valid = sigctx.verify_document(doc)
         .expect("Failed to verify document");

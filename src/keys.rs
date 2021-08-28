@@ -39,6 +39,134 @@ pub enum XmlSecKeyFormat
 #[derive(Debug)]
 pub struct XmlSecKey(*mut bindings::xmlSecKey);
 
+#[cfg(feature = "dynamic")]
+fn load_key_from_path(cpath: *const c_char, format: XmlSecKeyFormat, cpassword: *const i8) -> bindings::xmlSecKeyPtr {
+    unsafe { bindings::xmlSecCryptoAppKeyLoad(
+        cpath,
+        format as u32,
+        cpassword,
+        null_mut(),
+        null_mut()
+    ) }
+}
+
+#[cfg(feature = "nss")]
+fn load_key_from_path(cpath: *const c_char, format: XmlSecKeyFormat, cpassword: *const i8) -> bindings::xmlSecKeyPtr {
+    unsafe { bindings::xmlSecNssAppKeyLoad(
+        cpath,
+        format as u32,
+        cpassword,
+        null_mut(),
+        null_mut()
+    ) }
+}
+
+#[cfg(feature = "gnutls")]
+fn load_key_from_path(cpath: *const c_char, format: XmlSecKeyFormat, cpassword: *const i8) -> bindings::xmlSecKeyPtr {
+    unsafe { bindings::xmlSecGnuTLSAppKeyLoad(
+        cpath,
+        format as u32,
+        cpassword,
+        null_mut(),
+        null_mut()
+    ) }
+}
+
+#[cfg(feature = "openssl")]
+fn load_key_from_path(cpath: *const c_char, format: XmlSecKeyFormat, cpassword: *const i8) -> bindings::xmlSecKeyPtr {
+    unsafe { bindings::xmlSecGnuTLSAppKeyLoad(
+        cpath,
+        format as u32,
+        cpassword,
+        null_mut(),
+        null_mut()
+    ) }
+}
+
+
+#[cfg(feature = "dynamic")]
+fn load_key_from_memory(buffer: &[u8], format: XmlSecKeyFormat, cpassword: *const i8) -> bindings::xmlSecKeyPtr {
+    unsafe { bindings::xmlSecCryptoAppKeyLoadMemory(
+        buffer.as_ptr(),
+        buffer.len() as u32,
+        format as u32,
+        cpassword,
+        null_mut(),
+        null_mut()) }
+}
+
+#[cfg(feature = "nss")]
+fn load_key_from_memory(buffer: &[u8], format: XmlSecKeyFormat, cpassword: *const i8) -> bindings::xmlSecKeyPtr {
+    unsafe { bindings::xmlSecNssAppKeyLoadMemory(
+        buffer.as_ptr(),
+        buffer.len() as u32,
+        format as u32,
+        cpassword,
+        null_mut(),
+        null_mut()) }
+}
+
+#[cfg(feature = "gnutls")]
+fn load_key_from_memory(buffer: &[u8], format: XmlSecKeyFormat, cpassword: *const i8) -> bindings::xmlSecKeyPtr {
+    unsafe { bindings::xmlSecGnuTLSAppKeyLoadMemory(
+        buffer.as_ptr(),
+        buffer.len() as u32,
+        format as u32,
+        cpassword,
+        null_mut(),
+        null_mut()) }
+}
+
+#[cfg(feature = "openssl")]
+fn load_key_from_memory(buffer: &[u8], format: XmlSecKeyFormat, cpassword: *const i8) -> bindings::xmlSecKeyPtr {
+    unsafe { bindings::xmlSecOpenSSLAppKeyLoadMemory(
+        buffer.as_ptr(),
+        buffer.len() as u32,
+        format as u32,
+        cpassword,
+        null_mut(),
+        null_mut()) }
+}
+
+#[cfg(feature = "dynamic")]
+fn load_cert_from_path(key: bindings::xmlSecKeyPtr, cpath: *const c_char, format: XmlSecKeyFormat) -> i32 {
+    unsafe { bindings::xmlSecCryptoAppKeyCertLoad(key, cpath, format as u32) }
+}
+
+#[cfg(feature = "nss")]
+fn load_cert_from_path(key: bindings::xmlSecKeyPtr, cpath: *const c_char, format: XmlSecKeyFormat) -> i32 {
+    unsafe { bindings::xmlSecNssAppKeyCertLoad(key, cpath, format as u32) }
+}
+
+#[cfg(feature = "gnutls")]
+fn load_cert_from_path(key: bindings::xmlSecKeyPtr, cpath: *const c_char, format: XmlSecKeyFormat) -> i32 {
+    unsafe { bindings::xmlSecGnuTLSAppKeyCertLoad(key, cpath, format as u32) }
+}
+
+#[cfg(feature = "openssl")]
+fn load_cert_from_path(key: bindings::xmlSecKeyPtr, cpath: *const c_char, format: XmlSecKeyFormat) -> i32 {
+    unsafe { bindings::xmlSecOpenSSLAppKeyCertLoad(key, cpath, format as u32) }
+}
+
+#[cfg(feature = "dynamic")]
+fn load_cert_from_memory(key: bindings::xmlSecKeyPtr, buffer: &[u8], format: XmlSecKeyFormat) -> i32 {
+    unsafe { bindings::xmlSecCryptoAppKeyCertLoadMemory(key, buffer.as_ptr(), buffer.len() as u32, format as u32) }
+}
+
+#[cfg(feature = "nss")]
+fn load_cert_from_memory(key: bindings::xmlSecKeyPtr, buffer: &[u8], format: XmlSecKeyFormat) -> i32 {
+    unsafe { bindings::xmlSecNssAppKeyCertLoadMemory(key, buffer.as_ptr(), buffer.len() as u32, format as u32) }
+}
+
+#[cfg(feature = "gnutls")]
+fn load_cert_from_memory(key: bindings::xmlSecKeyPtr, buffer: &[u8], format: XmlSecKeyFormat) -> i32 {
+    unsafe { bindings::xmlSecGnuTLSAppKeyCertLoadMemory(key, buffer.as_ptr(), buffer.len() as u32, format as u32) }
+}
+
+#[cfg(feature = "openssl")]
+fn load_cert_from_memory(key: bindings::xmlSecKeyPtr, buffer: &[u8], format: XmlSecKeyFormat) -> i32 {
+    unsafe { bindings::xmlSecOpenSSLAppKeyCertLoadMemory(key, buffer.as_ptr(), buffer.len() as u32, format as u32) }
+}
 
 impl XmlSecKey
 {
@@ -58,13 +186,8 @@ impl XmlSecKey
             .unwrap_or(null());
 
         // Load key from file
-        let key = unsafe { bindings::xmlSecOpenSSLAppKeyLoad(
-            cpath.as_ptr(),
-            format as u32,
-            cpasswd_ptr,
-            null_mut(),
-            null_mut()
-        ) };
+        // #[cfg(feature = "dynamic")]
+        let key = load_key_from_path(cpath.as_ptr(), format, cpasswd_ptr);
 
         if key.is_null() {
             return Err(XmlSecError::KeyLoadError);
@@ -85,14 +208,7 @@ impl XmlSecKey
             .unwrap_or(null());
 
         // Load key from buffer
-        let key = unsafe { bindings::xmlSecOpenSSLAppKeyLoadMemory(
-            buffer.as_ptr(),
-            buffer.len() as u32,
-            format as u32,
-            cpasswd_ptr,
-            null_mut(),
-            null_mut()
-        ) };
+        let key = load_key_from_memory(buffer, format, cpasswd_ptr);
 
         if key.is_null() {
             return Err(XmlSecError::KeyLoadError);
@@ -106,7 +222,7 @@ impl XmlSecKey
     {
         let cpath = CString::new(path).unwrap();
 
-        let rc = unsafe { bindings::xmlSecOpenSSLAppKeyCertLoad(self.0, cpath.as_ptr(), format as u32) };
+        let rc = load_cert_from_path(self.0, cpath.as_ptr(), format);
 
         if rc != 0 {
             return Err(XmlSecError::CertLoadError);
@@ -118,14 +234,7 @@ impl XmlSecKey
     /// Load certificate into key by specifying buffer to its contents.
     pub fn load_cert_from_memory(&self, buff: &[u8], format: XmlSecKeyFormat) -> XmlSecResult<()>
     {
-        let rc = unsafe {
-            bindings::xmlSecOpenSSLAppKeyCertLoadMemory(
-                self.0,
-                buff.as_ptr(),
-                buff.len() as u32,
-                format as u32
-            )
-        };
+        let rc = load_cert_from_memory(self.0, buff, format);
 
         if rc != 0 {
             return Err(XmlSecError::CertLoadError);
